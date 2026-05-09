@@ -152,6 +152,13 @@
                     .text-center { text-align: center; }
                     .text-red-500 { color: red; font-weight: bold; }
                     .overflow-x-auto { overflow: visible; max-height: none; }
+                    
+                    /* 注意事項列印樣式 */
+                    .bg-blue-50\\/50 { background-color: #eff6ff; padding: 15px; border-left: 4px solid #3b82f6; margin-bottom: 20px; border-radius: 4px; font-size: 14px; }
+                    .text-blue-800 { color: #1e40af; }
+                    .list-decimal { padding-left: 20px; margin-top: 10px; margin-bottom: 10px; }
+                    .list-decimal li { margin-bottom: 6px; line-height: 1.5; }
+
                     @page { size: portrait; margin: 10mm; }
                 `);
                 win.document.write('</style></head><body>');
@@ -215,23 +222,41 @@
                                     選擇並執行 <strong className="bg-gray-200 px-2 py-1 rounded text-red-600">setupInitialData</strong> 以載入預設行事曆！
                                 </div>
                             ) : (
-                                <div ref={printRef} className="overflow-x-auto max-h-[80vh] w-full">
-                                    <table className="w-full text-left border-collapse relative">
-                                        <thead>
-                                            <tr>
-                                                <th className="th-custom bg-gray-100 text-gray-600 w-16">日期</th>
-                                                <th className="th-custom bg-gray-100 text-gray-600 w-12">星期</th>
-                                                <th className="th-custom header-events min-w-[150px] sm:min-w-[200px]">🚩 行事活動</th>
-                                                <th className="th-custom header-camps min-w-[150px] sm:min-w-[200px]">🏕️ 到校活動營隊</th>
-                                                <th className="th-custom header-admin min-w-[100px] sm:min-w-[120px]">🧑‍💼 值日行政</th>
-                                                <th className="th-custom header-gate min-w-[100px]">🔑 開門人員</th>
-                                                <th className="th-custom header-note min-w-[150px]">📝 備註</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody className="divide-y divide-gray-100">
-                                            {data.map(row => <CalendarRow key={row.rowIndex} row={row} isAdmin={isAdmin} onUpdate={handleUpdate} />)}
-                                        </tbody>
-                                    </table>
+                                <div ref={printRef} className="w-full">
+                                    {/* 注意事項區塊 */}
+                                    <div className="bg-blue-50/50 border-l-4 border-blue-500 p-4 m-4 text-sm text-blue-800 rounded shadow-sm">
+                                        <h3 className="font-bold text-base mb-2"><i className="fas fa-info-circle mr-2"></i>【值勤人員注意事項】</h3>
+                                        <ol className="list-decimal list-outside ml-5 space-y-1.5 leading-relaxed">
+                                            <li>值勤人員起訖時間：值日上午八時至下午四時。</li>
+                                            <li>值勤人員應注意學校安全並不定時巡視校內。</li>
+                                            <li>值日行政人員應填寫學校日誌。</li>
+                                            <li>保全人員應負責升降旗，維護學校清潔。</li>
+                                            <li>值日人員遇偶發事件應保持現場，並聯絡校長、主任到校處理。</li>
+                                            <li>開學日9/01(二)，當日正常上放學。</li>
+                                            <li>圖書室寒暑假 特定日期的上午9:00至11:00開放借還書。</li>
+                                            <li>輪值順序為「教務主任→教學組長→註冊設備組長→學務主任→生教組長→體衛組長→護士→總務主任→事務組長→幹事→幼兒園主任→幼兒園教保員」共12位輪替。</li>
+                                            <li>115年暑假輪值從 <strong>體衛組長</strong> 開始到 <strong>幼兒園教保員</strong> 結束，116年寒假輪值預計由 <strong>教務主任</strong> 開始。</li>
+                                        </ol>
+                                    </div>
+
+                                    <div className="overflow-x-auto max-h-[65vh] w-full px-4 pb-4">
+                                        <table className="w-full text-left border-collapse relative">
+                                            <thead>
+                                                <tr>
+                                                    <th className="th-custom bg-gray-100 text-gray-600 w-16">日期</th>
+                                                    <th className="th-custom bg-gray-100 text-gray-600 w-12">星期</th>
+                                                    <th className="th-custom header-events min-w-[150px] sm:min-w-[200px]">🚩 行事活動</th>
+                                                    <th className="th-custom header-camps min-w-[150px] sm:min-w-[200px]">🏕️ 到校活動營隊</th>
+                                                    <th className="th-custom header-admin min-w-[100px] sm:min-w-[120px]">🧑‍💼 值日行政</th>
+                                                    <th className="th-custom header-gate min-w-[100px]">🔑 開門人員</th>
+                                                    <th className="th-custom header-note min-w-[150px]">📝 備註</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody className="divide-y divide-gray-100">
+                                                {data.map(row => <CalendarRow key={row.rowIndex} row={row} isAdmin={isAdmin} onUpdate={handleUpdate} />)}
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
                             )}
                         </div>
@@ -247,13 +272,32 @@
             const bgClass = isHoliday ? 'bg-gray-50' : 'bg-white hover:bg-orange-50/20';
             const dateClass = isWeekend ? 'text-red-500 font-bold' : 'text-gray-700 font-bold sm:text-lg';
 
+            // 值日行政人員名單 (用於下拉選單)
+            const STAFF_ROLES = ["教務主任", "教學組長", "註冊設備組長", "學務主任", "生教組長", "體衛組長", "護士", "總務主任", "事務組長", "幹事", "幼兒園主任", "幼兒園教保員"];
+
             return (
                 <tr className={bgClass}>
                     <td className={`cell-base text-center py-3 ${dateClass}`}>{row['月']}/{row['日']}</td>
                     <td className={`cell-base text-center py-3 ${dateClass}`}>{row['星期']}</td>
                     <Cell value={row['行事活動']} isAdmin={isAdmin} onSave={val => onUpdate(row.rowIndex, '行事活動', val)} className="text-red-900 sm:text-base text-sm" />
                     <Cell value={row['到校活動營隊']} isAdmin={isAdmin} onSave={val => onUpdate(row.rowIndex, '到校活動營隊', val)} className="text-green-900 text-sm" />
-                    <Cell value={row['值日行政人員']} isAdmin={isAdmin} onSave={val => onUpdate(row.rowIndex, '值日行政人員', val)} className={`text-center text-sm sm:text-base ${row['值日行政人員'] === '---' ? 'text-gray-300' : 'text-blue-900 font-bold'}`} />
+                    
+                    {/* 修改為下拉選單的值日行政人員 */}
+                    <td className={`cell-base p-0 align-top relative ${row['值日行政人員'] === '---' ? 'text-gray-300 text-center py-3' : 'text-blue-900 font-bold'}`}>
+                        {isAdmin && row['值日行政人員'] !== '---' ? (
+                            <select 
+                                className="w-full h-full min-h-[40px] bg-yellow-50 px-1 py-2 outline-none border-2 border-orange-300 text-sm sm:text-base text-center font-bold text-blue-900 cursor-pointer"
+                                value={row['值日行政人員']} 
+                                onChange={e => onUpdate(row.rowIndex, '值日行政人員', e.target.value)}
+                            >
+                                <option value="">(未排定)</option>
+                                {STAFF_ROLES.map(role => <option key={role} value={role}>{role}</option>)}
+                            </select>
+                        ) : (
+                            <div className="py-3 px-1 text-center text-sm sm:text-base">{row['值日行政人員']}</div>
+                        )}
+                    </td>
+
                     <Cell value={row['值日開門人員']} isAdmin={isAdmin} onSave={val => onUpdate(row.rowIndex, '值日開門人員', val)} className={`text-center text-sm sm:text-base ${row['值日開門人員'] === '---' ? 'text-gray-300' : 'text-gray-700 font-bold bg-yellow-50/30'}`} />
                     <Cell value={row['備註']} isAdmin={isAdmin} onSave={val => onUpdate(row.rowIndex, '備註', val)} className="text-purple-900 text-sm" />
                 </tr>
