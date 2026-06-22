@@ -2,12 +2,12 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <!-- RWD 必備 viewport 設定 -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>南興國小 115年暑假行事曆</title>
-    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- 固定套件版本，防止官方突然更新導致網站崩潰 -->
+    <script src="https://unpkg.com/react@18.2.0/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone@7.23.9/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -15,7 +15,6 @@
         body { font-family: "Microsoft JhengHei", sans-serif; background-color: #f8fafc; }
         .whitespace-pre-wrap { white-space: pre-wrap; }
         
-        /* 讓表頭在上下捲動時固定 */
         thead th {
             position: sticky;
             top: 0;
@@ -30,14 +29,12 @@
         .cell-content { min-height: 40px; padding: 4px; border-radius: 4px; font-size: 0.9em; line-height: 1.4; }
         .cell-content:hover { background-color: rgba(0,0,0,0.02); }
         
-        /* 暑假客製化表頭顏色 */
         .header-events { background-color: #ef4444; color: white; }
         .header-camps { background-color: #10b981; color: white; }
         .header-admin { background-color: #3b82f6; color: white; }
         .header-gate { background-color: #f59e0b; color: white; }
         .header-note { background-color: #64748b; color: white; }
 
-        /* RWD 捲軸美化 */
         ::-webkit-scrollbar { height: 8px; width: 8px; }
         ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
@@ -50,7 +47,7 @@
     <script type="text/babel">
         const { useState, useEffect, useRef } = React;
 
-        // ★★★ 請替換成您 115暑假 專案部署的新網址 ★★★
+        // ★★★ 已帶入您的 115暑假 GAS 網址 ★★★
         const FIXED_API_URL = "https://script.google.com/macros/s/AKfycbynLfwNInq9Ax3LZTL7RZom_KAW5VLc-89Uo5Yenud3Q_Qlz7Sl9CznyvmoEzdJoy0p/exec"; 
 
         function App() {
@@ -60,18 +57,13 @@
             const [isAdmin, setIsAdmin] = useState(false); 
             const [showLoginInput, setShowLoginInput] = useState(false); 
             const [inputPwd, setInputPwd] = useState('');  
-            const [loading, setLoading] = useState(true); // 預設讀取中
+            const [loading, setLoading] = useState(true); 
             const [saving, setSaving] = useState(false);
             const [notification, setNotification] = useState(null);
             
             const printRef = useRef();
 
             useEffect(() => {
-                if (!apiUrl || apiUrl.includes("在此貼上")) {
-                    alert("⚠️ 請設定正確的 GAS 網址");
-                    setLoading(false);
-                    return;
-                }
                 fetchData(apiUrl);
             }, []);
 
@@ -83,7 +75,6 @@
             const fetchData = async (url) => {
                 setLoading(true);
                 try {
-                    // 加入 redirect: "follow" 確保 GitHub Pages 跨網域存取正常
                     const res = await fetch(url, { redirect: "follow" });
                     const json = await res.json();
                     if (json.status === 'success') {
@@ -109,7 +100,6 @@
                 setData(newData);
                 setSaving(true);
                 try {
-                    // 加入 redirect: "follow" 與 text/plain 避免 CORS 預檢失敗
                     await fetch(apiUrl, {
                         method: 'POST',
                         body: JSON.stringify({ rowIndex, column, value: newValue, password: systemPwd }),
@@ -121,7 +111,6 @@
                 setSaving(false);
             };
 
-            // 開新視窗列印法
             const handlePrint = () => {
                 const tableContent = printRef.current.innerHTML;
                 const win = window.open('', '', 'height=800,width=1200');
@@ -139,7 +128,6 @@
                     th, td { border: 1px solid #000; padding: 5px; vertical-align: top; text-align: left; }
                     th { background-color: #f0f0f0; text-align: center; font-weight: bold; }
                     
-                    /* 列印顏色還原 */
                     .text-red-900 { color: #7f1d1d; }
                     .text-green-900 { color: #14532d; }
                     .text-blue-900 { color: #1e3a8a; }
@@ -153,7 +141,6 @@
                     .text-red-500 { color: red; font-weight: bold; }
                     .overflow-x-auto { overflow: visible; max-height: none; }
                     
-                    /* 注意事項列印樣式 */
                     .bg-blue-50\\/50 { background-color: #eff6ff; padding: 15px; border-left: 4px solid #3b82f6; margin-bottom: 20px; border-radius: 4px; font-size: 14px; }
                     .text-blue-800 { color: #1e40af; }
                     .list-decimal { padding-left: 20px; margin-top: 10px; margin-bottom: 10px; }
@@ -183,10 +170,7 @@
                                 </div>
                             </div>
                             <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
-                                <button 
-                                    onClick={handlePrint} 
-                                    className="bg-emerald-600 text-white text-sm px-3 sm:px-4 py-2 rounded-lg hover:bg-emerald-700 shadow flex items-center cursor-pointer active:scale-95 transition-transform"
-                                >
+                                <button onClick={handlePrint} className="bg-emerald-600 text-white text-sm px-3 sm:px-4 py-2 rounded-lg hover:bg-emerald-700 shadow flex items-center cursor-pointer active:scale-95 transition-transform">
                                     <i className="fas fa-print sm:mr-2"></i> <span className="hidden sm:inline">列印 PDF</span>
                                 </button>
                                 {isAdmin ? (
@@ -214,7 +198,6 @@
                             {loading ? (
                                 <div className="p-20 text-center text-gray-500"><i className="fas fa-circle-notch fa-spin text-2xl mb-2"></i><br/>資料讀取中...</div> 
                             ) : data.length === 0 ? (
-                                /* 若無資料，給予明確提示 */
                                 <div className="p-20 text-center text-gray-500 bg-orange-50/50 m-4 rounded-lg border border-orange-100">
                                     <i className="fas fa-database text-4xl mb-4 text-orange-400"></i><br/>
                                     <span className="text-lg font-bold text-gray-700">目前沒有資料</span><br/><br/>
@@ -223,7 +206,6 @@
                                 </div>
                             ) : (
                                 <div ref={printRef} className="w-full">
-                                    {/* 注意事項區塊 */}
                                     <div className="bg-blue-50/50 border-l-4 border-blue-500 p-4 m-4 text-sm text-blue-800 rounded shadow-sm">
                                         <h3 className="font-bold text-base mb-2"><i className="fas fa-info-circle mr-2"></i>【值勤人員注意事項】</h3>
                                         <ol className="list-decimal list-outside ml-5 space-y-1.5 leading-relaxed">
@@ -232,7 +214,7 @@
                                             <li>值日行政人員應填寫學校日誌。</li>
                                             <li>保全人員應負責升降旗，維護學校清潔。</li>
                                             <li>值日人員遇偶發事件應保持現場，並聯絡校長、主任到校處理。</li>
-                                            <li>開學日8/31(二)，當日正常上放學。</li>
+                                            <li>開學日9/01(二)，當日正常上放學。</li>
                                             <li>圖書室寒暑假 特定日期的上午9:00至11:00開放借還書。</li>
                                             <li>輪值順序為「教務主任→教學組長→註冊設備組長→學務主任→生教組長→體衛組長→護士→總務主任→事務組長→幹事→幼兒園主任→幼兒園教保員」共12位輪替。</li>
                                             <li>115年暑假輪值從 <strong>體衛組長</strong> 開始到 <strong>幼兒園教保員</strong> 結束，116年寒假輪值預計由 <strong>教務主任</strong> 開始。</li>
@@ -267,12 +249,9 @@
 
         const CalendarRow = ({ row, isAdmin, onUpdate }) => {
             const isWeekend = row['星期'] === '六' || row['星期'] === '日';
-            // 週末或是有標示 "---" 的日子顯示灰色背景
             const isHoliday = isWeekend || row['值日行政人員'] === '---';
             const bgClass = isHoliday ? 'bg-gray-50' : 'bg-white hover:bg-orange-50/20';
             const dateClass = isWeekend ? 'text-red-500 font-bold' : 'text-gray-700 font-bold sm:text-lg';
-
-            // 值日行政人員名單 (用於下拉選單)
             const STAFF_ROLES = ["教務主任", "教學組長", "註冊設備組長", "學務主任", "生教組長", "體衛組長", "護士", "總務主任", "事務組長", "幹事", "幼兒園主任", "幼兒園教保員"];
 
             return (
@@ -282,7 +261,6 @@
                     <Cell value={row['行事活動']} isAdmin={isAdmin} onSave={val => onUpdate(row.rowIndex, '行事活動', val)} className="text-red-900 sm:text-base text-sm" />
                     <Cell value={row['到校活動營隊']} isAdmin={isAdmin} onSave={val => onUpdate(row.rowIndex, '到校活動營隊', val)} className="text-green-900 text-sm" />
                     
-                    {/* 修改為下拉選單的值日行政人員 */}
                     <td className={`cell-base p-0 align-top relative ${row['值日行政人員'] === '---' ? 'text-gray-300 text-center py-3' : 'text-blue-900 font-bold'}`}>
                         {isAdmin && row['值日行政人員'] !== '---' ? (
                             <select 
